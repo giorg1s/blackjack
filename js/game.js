@@ -19,12 +19,16 @@ function startGame() {
     deck = createDeck();
     dealerHand = [deck.pop(), deck.pop()];
     playerHands = [[deck.pop(), deck.pop()]];
+
+    // Starter bet
+    playerHands[0].bet = bet;
+
     activeHand = 0;
     state = STATES.PLAYER;
     setStatus("Good luck!");
     renderHands(playerHands[0], dealerHand);
 
-    // Καθαρίζει το bet για νέο γύρο
+    // clears bet for next round
     bet = 0;
     updateStats(balance, wins, losses, bet);
 }
@@ -47,8 +51,8 @@ function stand() {
 function doubleDown() {
     if (state !== STATES.PLAYER || balance < bet) return;
     balance -= bet;
-    bet *= 2;
-    updateStats(balance, wins, losses, bet);
+    playerHands[activeHand].bet = bet * 2;
+    updateStats(balance, wins, losses, playerHands[activeHand].bet);
     playerHands[activeHand].push(deck.pop());
     renderHands(playerHands[activeHand], dealerHand);
     nextHandOrDealer();
@@ -61,7 +65,13 @@ function split() {
     if (hand[0].value !== hand[1].value) return;
 
     balance -= bet;
-    playerHands = [[hand[0], deck.pop()], [hand[1], deck.pop()]];
+    playerHands = [
+        [hand[0], deck.pop()],
+        [hand[1], deck.pop()]
+    ];
+    playerHands[0].bet = bet;
+    playerHands[1].bet = bet;
+
     activeHand = 0;
     document.getElementById("playerCards").innerHTML = "";
     updateStats(balance, wins, losses, bet);
@@ -89,25 +99,27 @@ function dealerTurn() {
     finishGame();
 }
 
-// ------- Finish Game -------
+// ------- Finish Game (Διορθωμένο για split & double) -------
 function finishGame() {
     const dScore = calculateScore(dealerHand);
     let msgParts = [];
 
     playerHands.forEach((hand) => {
         const pScore = calculateScore(hand);
+        const handBet = hand.bet || bet;
+
         if (pScore > 21) {
             losses++;
             msgParts.push("Bust!");
         } else if (dScore > 21 || pScore > dScore) {
-            balance += bet * 2;
+            balance += handBet * 2;
             wins++;
             msgParts.push("Win!");
         } else if (pScore < dScore) {
             losses++;
             msgParts.push("Lost.");
         } else {
-            balance += bet;
+            balance += handBet;
             msgParts.push("Push.");
         }
     });
@@ -117,10 +129,9 @@ function finishGame() {
     state = STATES.GAME_OVER;
     renderHands(playerHands[activeHand], dealerHand, true);
 
-    // Alert και μετά νέο γύρο, περιμένει νέο bet
     setTimeout(() => {
         alert(msgParts.join(" "));
-        autoNewRound(); // Επιστρέφει σε BETTING state
+        autoNewRound();
     }, 500);
 }
 
