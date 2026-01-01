@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="site-header" role="banner">
+    <h1 id="game-title">Blackjack</h1>
+    </header>
+
+    <!-- Main game area -->
+    <main id="main" class="site-main" role="main" aria-labelledby="game-title">
+
+    <!-- Game table -->
+    <div class="table" role="application" aria-describedby="status" aria-label="Blackjack game table">
+
+        <!-- Game statistics -->
+        <section class="stats" aria-label="Game statistics">
+            <div class="stat-item">
+                <span class="stat-label">Balance</span>
+                <span class="stat-value" id="balance" aria-live="polite">500</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Wins</span>
+                <span class="stat-value" id="wins" aria-live="polite">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Losses</span>
+                <span class="stat-value" id="losses" aria-live="polite">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Current Bet</span>
+                <span class="stat-value" id="currentBet" aria-live="polite">0</span>
+            </div>
+        </section>
+
+        <!-- Betting controls -->
+        <section class="bet" aria-label="Betting controls">
+            <p class="bet-label" id="bet-label">Choose your bet amount:</p>
+            <div class="bet-buttons" role="group" aria-labelledby="bet-label">
+                <button data-bet="10">10</button>
+                <button data-bet="25">25</button>
+                <button data-bet="50">50</button>
+                <button data-bet="all" class="allin-btn">All In</button>
+            </div>
+        </section>
+
+        <!-- Hands display -->
+        <section class="hand" aria-label="Dealer hand" id="dealerHand">
+            <h3 id="dealerTitle">Dealer</h3>
+            <div id="dealerCards" class="cards" aria-live="polite" aria-atomic="true"></div>
+            <p>Score: <span id="dealerScore">?</span></p>
+        </section>
+
+        <!-- Player hand -->
+        <section class="hand" aria-label="Player hand" id="playerHand">
+            <h3 id="playerTitle">Player</h3>
+            <div id="playerCards" class="cards" aria-live="polite" aria-atomic="true"></div>
+            <p>Score: <span id="playerScore">0</span></p>
+        </section>
+
+        <!-- Game controls -->
+        <nav class="controls" aria-label="Game controls">
+            <button id="hitBtn">Hit</button>
+            <button id="standBtn">Stand</button>
+            <button id="doubleBtn">Double</button>
+            <button id="splitBtn">Split</button>
+            <button id="newGameBtn">New Game</button>
+        </nav>
+
+        <!-- Status messages -->
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+    </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="site-footer" role="contentinfo">
+    <p>
+        Minimal Blackjack - Contact:
+        <a href="mailto:giorgosinbond@gmail.com" aria-label="Send email">
+        <img src="images/email.png" alt="Email">
+        </a>
+        <a href="https://github.com/giorg1s" target="_blank" rel="noopener" aria-label="GitHub profile">
+        <img src="images/github.png" alt="GitHub">
+        </a>
+    </p>
+    </footer>
+
+    <script type="module" src="js/game.js"></script>
+</body>
+</html>

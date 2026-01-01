@@ -1,0 +1,358 @@
+/* =========================================================
+   Blackjack Game – Clean, Grid-based, Accessible CSS
+   ========================================================= */
+
+/* ---------- Theme Variables ---------- */
+:root {
+    --bg-1: #071018;
+    --bg-2: #0b1220;
+    --panel: rgba(255, 255, 255, 0.06);
+    --text: #e6eef6;
+    --muted: #9aa7b4;
+    --accent: #22c55e;
+    --danger: #ef4444;
+
+    --radius: 12px;
+    --gap: 16px;
+    --max-width: 900px;
+}
+
+/* ---------- Reset ---------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    scroll-behavior: smooth;
+}
+html,
+body {
+    height: 100%;
+}
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: radial-gradient(circle at top left, var(--bg-2), var(--bg-1));
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+}
+
+/* ---------- Header ---------- */
+.site-header {
+    text-align: center;
+    padding: 12px 0;
+}
+
+/* ---------- Main ---------- */
+.site-main {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* ---------- Game Table (GRID LAYOUT) ---------- */
+.table {
+    width: 100%;
+    max-width: var(--max-width);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "stats bet"
+        "dealer dealer"
+        "player player"
+        "controls controls"
+        "status status";
+    gap: var(--gap);
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: var(--radius);
+}
+
+/* ---------- Sections ---------- */
+.stats {
+    grid-area: stats;
+}
+.bet {
+    grid-area: bet;
+}
+#dealerHand {
+    grid-area: dealer;
+}
+#playerHand {
+    grid-area: player;
+}
+.controls {
+    grid-area: controls;
+}
+.status {
+    grid-area: status;
+}
+
+/* ---------- Panels ---------- */
+.stats,
+.bet,
+.hand {
+    background: var(--panel);
+    padding: 14px;
+    border-radius: var(--radius);
+}
+
+/* ---------- Hands ---------- */
+.hand {
+    text-align: center;
+}
+.cards {
+    margin: 16px 0;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-height: 90px;
+}
+
+/* ---------- Bet Section ---------- */
+.bet-label {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    display: block;
+    color: var(--text);
+}
+.bet-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.bet-buttons button {
+    padding: 16px 24px;
+    font-size: 1.1rem;
+    background: #1e293b;
+    color: white;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.bet-buttons button:hover {
+    background: #334155;
+    transform: translateY(-2px) scale(1.05);
+}
+.bet-buttons button.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: #16a34a;
+    transform: scale(1.1);
+}
+/* All In button style */
+.allin-btn {
+    background: #f59e0b;
+    color: #fff;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 12px 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.allin-btn:hover {
+    background: #d97706;
+    transform: translateY(-2px) scale(1.05);
+}
+.allin-btn.active {
+    background: var(--accent);
+    border-color: #16a34a;
+    transform: scale(1.05);
+}
+
+/* ---------- Stats Section ---------- */
+.stats {
+    grid-area: stats;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+.stat-item {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 12px;
+    border-radius: var(--radius);
+    text-align: center;
+    transition: background 0.3s ease, transform 0.2s ease;
+}
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+.stat-label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+.stat-value {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text);
+    transition: color 0.3s ease;
+}
+
+/* ---------- Reset Stats Button ---------- */
+.reset-btn {
+    font-size: 15px;
+    padding: 12px 18px;
+    background: #ef4444;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-top: 8px;
+}
+.reset-btn:hover {
+    background: #ff5b5b;
+    transform: translateY(-2px);
+}
+
+/* ---------- Keyframes for card animations ---------- */
+@keyframes dealCard {
+    0% {
+        transform: translateY(-20px) scale(0.9);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+
+/* ---------- Cards ---------- */
+.card {
+    width: 64px;
+    height: 90px;
+    background: white;
+    color: black;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+    animation: dealCard 0.4s ease forwards;
+}
+.card:hover {
+    transform: translateY(-6px) scale(1.05);
+}
+.card.red {
+    color: var(--danger);
+}
+
+/* ---------- Controls Buttons---------- */
+.controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.controls button {
+    font-size: 17px;
+    padding: 20px 28px;
+    background: #1e293b;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.controls button:hover {
+    background: #334155;
+    transform: translateY(-2px) scale(1.05);
+}
+.controls button:active {
+    background: var(--accent);
+    color: #fff;
+    border-color: #0026fd;
+    transform: scale(1.1);
+}
+.controls button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ---------- State-based UI ---------- */
+.table[data-state="PLAYER"] .bet,
+.table[data-state="DEALER"] .bet {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* ---------- Status ---------- */
+.status {
+    text-align: center;
+    font-weight: bold;
+    color: var(--muted);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 14px 10px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+    background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(0, 0, 0, 0.25)
+    );
+}
+/* Footer text container */
+.site-footer p {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+/* Footer links */
+.site-footer a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
+/* Icons */
+.site-footer img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.75;
+}
+/* Hover / focus states */
+.site-footer a:hover img,
+.site-footer a:focus-visible img {
+    opacity: 1;
+}
+/* Keyboard focus accessibility */
+.site-footer a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 640px) {
+    .table {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+        "stats"
+        "bet"
+        "dealer"
+        "player"
+        "controls"
+        "status";
+    }
+}
