@@ -18,18 +18,16 @@ function startGame() {
     document.getElementById("dealerCards").innerHTML = "";
     deck = createDeck();
     dealerHand = [deck.pop(), deck.pop()];
-    playerHands = [[deck.pop(), deck.pop()]];
 
-    // Starter bet
-    playerHands[0].bet = bet;
+    playerHands = [[deck.pop(), deck.pop()]];
+    playerHands[0].bet = bet; 
+    balance -= bet;
 
     activeHand = 0;
     state = STATES.PLAYER;
     setStatus("Good luck!");
     renderHands(playerHands[0], dealerHand);
 
-    // clears bet for next round
-    bet = 0;
     updateStats(balance, wins, losses, bet);
 }
 
@@ -49,32 +47,37 @@ function stand() {
 
 // ------- Double Down -------
 function doubleDown() {
-    if (state !== STATES.PLAYER || balance < bet) return;
-    balance -= bet;
-    playerHands[activeHand].bet = bet * 2;
-    updateStats(balance, wins, losses, playerHands[activeHand].bet);
-    playerHands[activeHand].push(deck.pop());
-    renderHands(playerHands[activeHand], dealerHand);
+    if (state !== STATES.PLAYER) return;
+    const hand = playerHands[activeHand];
+    if (balance < hand.bet) return;
+
+    balance -= hand.bet;
+    hand.bet *= 2;
+    updateStats(balance, wins, losses, hand.bet);
+
+    hand.push(deck.pop());
+    renderHands(hand, dealerHand);
     nextHandOrDealer();
 }
 
 // ------- Split -------
 function split() {
     const hand = playerHands[0];
-    if (state !== STATES.PLAYER || balance < bet || hand.length !== 2) return;
+    if (state !== STATES.PLAYER || balance < hand.bet || hand.length !== 2) return;
     if (hand[0].value !== hand[1].value) return;
 
-    balance -= bet;
-    playerHands = [
+    balance -= hand.bet;
+    const newHands = [
         [hand[0], deck.pop()],
         [hand[1], deck.pop()]
     ];
-    playerHands[0].bet = bet;
-    playerHands[1].bet = bet;
+    newHands[0].bet = hand.bet;
+    newHands[1].bet = hand.bet;
 
+    playerHands = newHands;
     activeHand = 0;
     document.getElementById("playerCards").innerHTML = "";
-    updateStats(balance, wins, losses, bet);
+    updateStats(balance, wins, losses, hand.bet);
     renderHands(playerHands[activeHand], dealerHand);
 }
 
@@ -99,14 +102,14 @@ function dealerTurn() {
     finishGame();
 }
 
-// ------- Finish Game (Διορθωμένο για split & double) -------
+// ------- Finish Game -------
 function finishGame() {
     const dScore = calculateScore(dealerHand);
     let msgParts = [];
 
     playerHands.forEach((hand) => {
         const pScore = calculateScore(hand);
-        const handBet = hand.bet || bet;
+        const handBet = hand.bet;
 
         if (pScore > 21) {
             losses++;
@@ -197,7 +200,6 @@ function init() {
             if (!amount || balance < amount) return;
 
             bet = amount;
-            balance -= amount;
             updateStats(balance, wins, losses, bet);
             setStatus("");
             startGame();
