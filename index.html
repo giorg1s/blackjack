@@ -59,6 +59,9 @@
         <!-- Player hand -->
         <section class="hand" aria-label="Player hand" id="playerHand">
             <h3 id="playerTitle">Player</h3>
+            <!-- Status messages -->
+            <div id="status" class="status" role="status" aria-live="polite"></div>
+            <div id="playerMessage" class="player-message"></div>
             <div id="playerCards" class="cards" aria-live="polite" aria-atomic="true"></div>
             <p>Score: <span id="playerScore">0</span></p>
         </section>
@@ -69,11 +72,7 @@
             <button id="standBtn">Stand</button>
             <button id="doubleBtn">Double</button>
             <button id="splitBtn">Split</button>
-            <button id="newGameBtn">New Game</button>
         </nav>
-
-        <!-- Status messages -->
-        <div id="status" class="status" role="status" aria-live="polite"></div>
 
     </div>
     </main>
