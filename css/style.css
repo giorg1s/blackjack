@@ -250,6 +250,13 @@ body {
     color: var(--danger);
 }
 
+/* ---------- Status ---------- */
+.status {
+    text-align: center;
+    font-weight: bold;
+    color: var(--muted);
+}
+
 /* ---------- Controls Buttons---------- */
 .controls {
     display: flex;
@@ -288,13 +295,6 @@ body {
 .table[data-state="DEALER"] .bet {
     pointer-events: none;
     opacity: 0.4;
-}
-
-/* ---------- Status ---------- */
-.status {
-    text-align: center;
-    font-weight: bold;
-    color: var(--muted);
 }
 
 /* ---------- Footer ---------- */
