@@ -23,6 +23,10 @@ function startGame() {
     state = STATES.PLAYER;
     setStatus("Good luck!");
     renderHands(playerHands[0], dealerHand);
+
+    // Καθαρίζει το bet για νέο γύρο
+    bet = 0;
+    updateStats(balance, wins, losses, bet);
 }
 
 // ------- Hit -------
@@ -113,9 +117,10 @@ function finishGame() {
     state = STATES.GAME_OVER;
     renderHands(playerHands[activeHand], dealerHand, true);
 
+    // Alert και μετά νέο γύρο, περιμένει νέο bet
     setTimeout(() => {
         alert(msgParts.join(" "));
-        autoNewRound();
+        autoNewRound(); // Επιστρέφει σε BETTING state
     }, 500);
 }
 
