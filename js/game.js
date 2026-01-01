@@ -25,7 +25,7 @@ function startGame() {
     renderHands(playerHands[0], dealerHand);
 }
 
-// ------- Hit Functionality -------
+// ------- Hit -------
 function hit() {
     if (state !== STATES.PLAYER) return;
     playerHands[activeHand].push(deck.pop());
@@ -33,13 +33,13 @@ function hit() {
     if (calculateScore(playerHands[activeHand]) > 21) nextHandOrDealer();
 }
 
-// ------- Stand Functionality -------
+// ------- Stand -------
 function stand() {
     if (state !== STATES.PLAYER) return;
     nextHandOrDealer();
 }
 
-// ------- Double Down Functionality -------
+// ------- Double Down -------
 function doubleDown() {
     if (state !== STATES.PLAYER || balance < bet) return;
     balance -= bet;
@@ -50,7 +50,7 @@ function doubleDown() {
     nextHandOrDealer();
 }
 
-// ------- Split Functionality -------
+// ------- Split -------
 function split() {
     const hand = playerHands[0];
     if (state !== STATES.PLAYER || balance < bet || hand.length !== 2) return;
@@ -64,7 +64,7 @@ function split() {
     renderHands(playerHands[activeHand], dealerHand);
 }
 
-// ------- Hand management -------
+// ------- Hand flow -------
 function nextHandOrDealer() {
     if (playerHands.length > 1 && activeHand === 0) {
         activeHand = 1;
@@ -76,7 +76,7 @@ function nextHandOrDealer() {
     }
 }
 
-// ------- Dealer's turn -------
+// ------- Dealer -------
 function dealerTurn() {
     state = STATES.DEALER;
     while (calculateScore(dealerHand) < 17) {
@@ -85,7 +85,7 @@ function dealerTurn() {
     finishGame();
 }
 
-// ------- Game conclusion -------
+// ------- Finish Game -------
 function finishGame() {
     const dScore = calculateScore(dealerHand);
     let msgParts = [];
@@ -112,24 +112,42 @@ function finishGame() {
     updateStats(balance, wins, losses, 0);
     state = STATES.GAME_OVER;
     renderHands(playerHands[activeHand], dealerHand, true);
-    setTimeout(() => alert(msgParts.join(" ")), 500);
+
+    setTimeout(() => {
+        alert(msgParts.join(" "));
+        autoNewRound();
+    }, 500);
 }
 
-// ------- Initialization -------
+// ------- Auto New Round -------
+function autoNewRound() {
+    state = STATES.BETTING;
+    bet = 0;
+
+    document.getElementById("playerCards").innerHTML = "";
+    document.getElementById("dealerCards").innerHTML = "";
+
+    updateStats(balance, wins, losses, bet);
+    setStatus("Place your bet!");
+
+    document
+        .querySelectorAll(".bet-buttons button")
+        .forEach(b => b.classList.remove("active"));
+}
+
+// ------- Init -------
 function init() {
     const hitBtn = document.getElementById("hitBtn");
     const standBtn = document.getElementById("standBtn");
     const doubleBtn = document.getElementById("doubleBtn");
     const splitBtn = document.getElementById("splitBtn");
-    const newGameBtn = document.getElementById("newGameBtn");
 
-    // Create Reset Stats button
+    // Reset stats button
     const statsEl = document.querySelector(".stats");
     if (statsEl) {
         const resetBtn = document.createElement("button");
-        resetBtn.id = "resetBtn";
-        resetBtn.type = "button";
         resetBtn.textContent = "Reset Stats";
+        resetBtn.type = "button";
         resetBtn.classList.add("reset-btn");
         resetBtn.addEventListener("click", () => {
             if (confirm("Reset all statistics and balance to $500?")) {
@@ -143,62 +161,40 @@ function init() {
     updateStats(balance, wins, losses, bet);
     setStatus("Place your bet!");
 
-    // Betting buttons (including All In)
-    const betGroup = document.querySelector('.bet-buttons');
+    // Betting
+    const betGroup = document.querySelector(".bet-buttons");
     if (betGroup) {
-        // add All In button dynamically
-        if (!betGroup.querySelector('.allin-btn')) {
+        if (!betGroup.querySelector(".allin-btn")) {
             const allInBtn = document.createElement("button");
             allInBtn.dataset.bet = "all";
             allInBtn.textContent = "All In";
+            allInBtn.type = "button";
             allInBtn.classList.add("allin-btn");
-            allInBtn.setAttribute("type", "button");
             betGroup.appendChild(allInBtn);
         }
 
         betGroup.addEventListener("click", (e) => {
             const btn = e.target.closest("[data-bet]");
-            if (!btn) return;
-            if (state !== STATES.BETTING) return;
+            if (!btn || state !== STATES.BETTING) return;
 
-            let amount;
-            if (btn.dataset.bet === "all") {
-                amount = balance;
-            } else {
-                amount = Number(btn.dataset.bet);
-            }
+            const amount = btn.dataset.bet === "all" ? balance : Number(btn.dataset.bet);
+            if (!amount || balance < amount) return;
 
-            if (!amount || isNaN(amount) || amount <= 0) return;
-            if (balance >= amount) {
-                bet = amount;
-                balance -= amount;
-                updateStats(balance, wins, losses, bet);
-                startGame();
-            } else {
-                setStatus("Not enough balance for that bet.");
-            }
+            bet = amount;
+            balance -= amount;
+            updateStats(balance, wins, losses, bet);
+            setStatus("");
+            startGame();
 
-            // Active button styling
-            betGroup.querySelectorAll("button").forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            betGroup.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
         });
     }
 
-    hitBtn && hitBtn.addEventListener('click', hit);
-    standBtn && standBtn.addEventListener('click', stand);
-    doubleBtn && doubleBtn.addEventListener('click', doubleDown);
-    splitBtn && splitBtn.addEventListener('click', split);
-    newGameBtn && newGameBtn.addEventListener('click', () => {
-        state = STATES.BETTING;
-        bet = 0;
-        updateStats(balance, wins, losses, bet);
-        setStatus("Place a new bet!");
-        document.getElementById("playerCards").innerHTML = "";
-        document.getElementById("dealerCards").innerHTML = "";
-        // Remove active state from all bet buttons
-        const allButtons = document.querySelectorAll('.bet-buttons button');
-        allButtons.forEach(b => b.classList.remove('active'));
-    });
+    hitBtn && hitBtn.addEventListener("click", hit);
+    standBtn && standBtn.addEventListener("click", stand);
+    doubleBtn && doubleBtn.addEventListener("click", doubleDown);
+    splitBtn && splitBtn.addEventListener("click", split);
 }
 
 // ------- DOM Ready -------
@@ -209,10 +205,4 @@ if (document.readyState === "loading") {
 }
 
 // ------- Exports -------
-export {
-    startGame,
-    hit,
-    stand,
-    doubleDown,
-    split
-};
+export { startGame, hit, stand, doubleDown, split };
