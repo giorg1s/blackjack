@@ -9,21 +9,27 @@ import { loadStats, saveStats } from "./storage.js";
 
 const STATES = { BETTING: "BETTING", PLAYER: "PLAYER", DEALER: "DEALER", GAME_OVER: "GAME_OVER" };
 let state = STATES.BETTING;
-let deck, dealerHand = [], playerHands = [], activeHand = 0, bet = 0;
+
+let deck;
+let dealerHand = [];
+let playerHands = [];
+let activeHand = 0;
+
+let bet = 0;
+let handBet = 0;
+
 let { balance, wins, losses } = loadStats();
 
 // ------- Start Game -------
 function startGame() {
     document.getElementById("playerCards").innerHTML = "";
     document.getElementById("dealerCards").innerHTML = "";
+
     deck = createDeck();
     dealerHand = [deck.pop(), deck.pop()];
-
     playerHands = [[deck.pop(), deck.pop()]];
-    playerHands[0].bet = bet; 
-    balance -= bet;
-
     activeHand = 0;
+
     state = STATES.PLAYER;
     setStatus("Good luck!");
     renderHands(playerHands[0], dealerHand);
@@ -34,9 +40,13 @@ function startGame() {
 // ------- Hit -------
 function hit() {
     if (state !== STATES.PLAYER) return;
+
     playerHands[activeHand].push(deck.pop());
     renderHands(playerHands[activeHand], dealerHand);
-    if (calculateScore(playerHands[activeHand]) > 21) nextHandOrDealer();
+
+    if (calculateScore(playerHands[activeHand]) > 21) {
+        nextHandOrDealer();
+    }
 }
 
 // ------- Stand -------
@@ -47,37 +57,44 @@ function stand() {
 
 // ------- Double Down -------
 function doubleDown() {
-    if (state !== STATES.PLAYER) return;
-    const hand = playerHands[activeHand];
-    if (balance < hand.bet) return;
+    if (state !== STATES.PLAYER || balance < handBet) return;
 
-    balance -= hand.bet;
-    hand.bet *= 2;
-    updateStats(balance, wins, losses, hand.bet);
+    balance -= handBet;
+    handBet *= 2;
+    bet = handBet * playerHands.length;
 
-    hand.push(deck.pop());
-    renderHands(hand, dealerHand);
+    updateStats(balance, wins, losses, bet);
+
+    playerHands[activeHand].push(deck.pop());
+    renderHands(playerHands[activeHand], dealerHand);
+
     nextHandOrDealer();
 }
 
 // ------- Split -------
 function split() {
     const hand = playerHands[0];
-    if (state !== STATES.PLAYER || balance < hand.bet || hand.length !== 2) return;
-    if (hand[0].value !== hand[1].value) return;
 
-    balance -= hand.bet;
-    const newHands = [
+    if (
+        state !== STATES.PLAYER ||
+        hand.length !== 2 ||
+        balance < handBet ||
+        hand[0].value !== hand[1].value
+    ) return;
+
+    balance -= handBet;
+
+    playerHands = [
         [hand[0], deck.pop()],
         [hand[1], deck.pop()]
     ];
-    newHands[0].bet = hand.bet;
-    newHands[1].bet = hand.bet;
 
-    playerHands = newHands;
+    bet = handBet * 2;
     activeHand = 0;
+
     document.getElementById("playerCards").innerHTML = "";
-    updateStats(balance, wins, losses, hand.bet);
+    updateStats(balance, wins, losses, bet);
+    setStatus("Split!");
     renderHands(playerHands[activeHand], dealerHand);
 }
 
@@ -96,9 +113,11 @@ function nextHandOrDealer() {
 // ------- Dealer -------
 function dealerTurn() {
     state = STATES.DEALER;
+
     while (calculateScore(dealerHand) < 17) {
         dealerHand.push(deck.pop());
     }
+
     finishGame();
 }
 
@@ -109,26 +128,31 @@ function finishGame() {
 
     playerHands.forEach((hand) => {
         const pScore = calculateScore(hand);
-        const handBet = hand.bet;
 
         if (pScore > 21) {
             losses++;
             msgParts.push("Bust!");
-        } else if (dScore > 21 || pScore > dScore) {
+        }
+        else if (dScore > 21 || pScore > dScore) {
             balance += handBet * 2;
             wins++;
             msgParts.push("Win!");
-        } else if (pScore < dScore) {
+        }
+        else if (pScore < dScore) {
             losses++;
             msgParts.push("Lost.");
-        } else {
+        }
+        else {
             balance += handBet;
             msgParts.push("Push.");
         }
     });
 
     saveStats(balance, wins, losses);
-    updateStats(balance, wins, losses, 0);
+
+    bet = 0;
+    updateStats(balance, wins, losses, bet);
+
     state = STATES.GAME_OVER;
     renderHands(playerHands[activeHand], dealerHand, true);
 
@@ -142,6 +166,7 @@ function finishGame() {
 function autoNewRound() {
     state = STATES.BETTING;
     bet = 0;
+    handBet = 0;
 
     document.getElementById("playerCards").innerHTML = "";
     document.getElementById("dealerCards").innerHTML = "";
@@ -182,37 +207,30 @@ function init() {
 
     // Betting
     const betGroup = document.querySelector(".bet-buttons");
-    if (betGroup) {
-        if (!betGroup.querySelector(".allin-btn")) {
-            const allInBtn = document.createElement("button");
-            allInBtn.dataset.bet = "all";
-            allInBtn.textContent = "All In";
-            allInBtn.type = "button";
-            allInBtn.classList.add("allin-btn");
-            betGroup.appendChild(allInBtn);
-        }
 
-        betGroup.addEventListener("click", (e) => {
-            const btn = e.target.closest("[data-bet]");
-            if (!btn || state !== STATES.BETTING) return;
+    betGroup.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-bet]");
+        if (!btn || state !== STATES.BETTING) return;
 
-            const amount = btn.dataset.bet === "all" ? balance : Number(btn.dataset.bet);
-            if (!amount || balance < amount) return;
+        const amount = btn.dataset.bet === "all" ? balance : Number(btn.dataset.bet);
+        if (!amount || balance < amount) return;
 
-            bet = amount;
-            updateStats(balance, wins, losses, bet);
-            setStatus("");
-            startGame();
+        bet = amount;
+        handBet = amount;
+        balance -= amount;
 
-            betGroup.querySelectorAll("button").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-        });
-    }
+        updateStats(balance, wins, losses, bet);
+        setStatus("");
+        startGame();
 
-    hitBtn && hitBtn.addEventListener("click", hit);
-    standBtn && standBtn.addEventListener("click", stand);
-    doubleBtn && doubleBtn.addEventListener("click", doubleDown);
-    splitBtn && splitBtn.addEventListener("click", split);
+        betGroup.querySelectorAll("button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+    });
+
+    hitBtn.addEventListener("click", hit);
+    standBtn.addEventListener("click", stand);
+    doubleBtn.addEventListener("click", doubleDown);
+    splitBtn.addEventListener("click", split);
 }
 
 // ------- DOM Ready -------
@@ -221,6 +239,3 @@ if (document.readyState === "loading") {
 } else {
     init();
 }
-
-// ------- Exports -------
-export { startGame, hit, stand, doubleDown, split };
