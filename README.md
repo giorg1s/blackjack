@@ -176,5 +176,3 @@ This project is licensed under the MIT License — see the [LICENSE](LICENSE.md)
 Giorgos Fyl  
 Email: giorgosinbond@gmail.com  
 GitHub: https://github.com/giorg1s
-
----
