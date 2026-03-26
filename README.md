@@ -29,7 +29,7 @@ A clean, accessible, and interactive Blackjack game built with HTML, CSS, and Ja
 
 ## Demo
 
-Try the live demo: [Live Demo](https://giorg1s.github.io/blackjack/)
+Try the live demo: [Live Demo](https://giorgosfyls.github.io/blackjack/)
 
 ---
 
